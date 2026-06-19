@@ -3,35 +3,72 @@ import pandas as pd
 
 def prepare_data(df):
 
-    df["Order Date"]=pd.to_datetime(
+    # Convert dates safely
 
-    df["Order Date"]
-
+    df["Order Date"] = pd.to_datetime(
+        df["Order Date"],
+        errors="coerce"
     )
 
-    df["Ship Date"]=pd.to_datetime(
-
-    df["Ship Date"]
-
+    df["Ship Date"] = pd.to_datetime(
+        df["Ship Date"],
+        errors="coerce"
     )
 
-    df["Lead_Time"]=(
+    # Remove invalid dates
 
-    df["Ship Date"]
+    df = df.dropna(
+        subset=[
+            "Order Date",
+            "Ship Date"
+        ]
+    )
 
-    -
+    # Lead time
 
-    df["Order Date"]
+    df["Lead_Time"] = (
+
+        df["Ship Date"]
+
+        - df["Order Date"]
 
     ).dt.days
 
-    df["Profit Margin"]=(
+    # Remove negative lead times
 
-    df["Gross Profit"]
+    df = df[
 
-    /
+        df["Lead_Time"] >= 0
 
-    df["Sales"]
+    ]
+
+    # Profit Margin
+
+    df["Profit Margin"] = (
+
+        df["Gross Profit"]
+
+        /
+
+        df["Sales"]
+
+    )
+
+    # Handle division by zero
+
+    df["Profit Margin"] = (
+
+        df["Profit Margin"]
+
+        .replace(
+
+            [float("inf"), -float("inf")],
+
+            0
+
+        )
+
+        .fillna(0)
 
     )
 
